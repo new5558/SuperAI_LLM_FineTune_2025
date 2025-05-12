@@ -23,7 +23,7 @@ pip install -e .
 
 ### Converting CSV Data for Training
 
-The repository includes a script to convert CSV files to the format required for TRL training. This is useful for preparing custom datasets.
+The repository includes a script to convert CSV files to the Huggingface dataset format required for TRL training.
 
 1. Place your CSV file in a suitable location (default example is in `example/test.csv`)
 2. Run the conversion script:
@@ -102,12 +102,6 @@ sbatch submit_multinode_trl_sft_lora.sh
 ```bash
 sbatch submit_multinode_trl_grpo.sh
 ```
-
-Note:
-
-- Change training config via the corresponding `smultinode_*.sh` scripts.
-- When using Deepspeed training, the Scheduler will follow the Deepspeed config.
-- You can setup training spec in the submit scripts following [our guideline](https://openthaigpt.gitbook.io/openthaigpt-guideline/lanta/slurm).
 
 ## Model Inference
 

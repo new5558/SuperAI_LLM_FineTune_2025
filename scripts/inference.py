@@ -19,21 +19,36 @@ def parse_args():
 if __name__ == "__main__":
     args = parse_args()
 
-    # 1. First load the configuration to get the base model name
-    peft_config = PeftConfig.from_pretrained(args.model_dir)
-    base_model_name = peft_config.base_model_name_or_path
-
-    # 2. Load the base model
+        # Try to load PEFT config but have fallback for regular models
+    try:
+        peft_config = PeftConfig.from_pretrained(args.model_dir)
+        base_model_name = peft_config.base_model_name_or_path
+        is_peft_model = True
+        print(f"Found PEFT adapter config, base model: {base_model_name}")
+    except Exception as e:
+        # If no PEFT config, assume args.model_dir is the base model itself
+        base_model_name = args.model_dir
+        is_peft_model = False
+        print(f"No PEFT config found, treating as regular model: {base_model_name}")
+    
+    # Load the base model
     base_model = AutoModelForCausalLM.from_pretrained(
         base_model_name,
-        # torch_dtype=torch.float16,
         torch_dtype=torch.bfloat16,
         device_map="auto",
         attn_implementation="eager"
     )
-
-    # 3. Load the LoRA adapter onto the base model
-    model = PeftModel.from_pretrained(base_model, args.model_dir)
+    
+    # Only attempt to load adapter if we found a valid PEFT config
+    if is_peft_model:
+        try:
+            model = PeftModel.from_pretrained(base_model, args.model_dir)
+            print("Successfully loaded PEFT adapter")
+        except Exception as e:
+            model = base_model
+            print(f"Failed to load PEFT adapter: {e}")
+    else:
+        model = base_model
 
 
 

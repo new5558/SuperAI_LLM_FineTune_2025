@@ -15,7 +15,7 @@ dependencies = [
     "hydra-core",
     "protobuf",
     "torch",
-
+    "scikit-learn",
     "deepspeed",
     "accelerate",
     "peft",

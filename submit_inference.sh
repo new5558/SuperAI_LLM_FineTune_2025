@@ -16,6 +16,10 @@ module load gcc/10.3.0
 conda deactivate
 conda activate ./env
 
+# Define model and validation data paths
+MODEL_DIR="/path/to/your/model/checkpoint"
+VAL_PATH="/path/to/your/validation/data"
+
 
 python scripts/inference.py \
   --model_dir ${MODEL_DIR} \

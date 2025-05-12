@@ -47,7 +47,7 @@ if __name__ == "__main__":
                             temperature=0.0,   # greedy → deterministic answers
                             top_p=1.0)
 
-    ds = load_from_disk(args.val_path)["train"]
+    ds = load_from_disk(args.val_path)
     true_labels = ds["answer"]
 
     def extract_xml_answer(text: str) -> str:
