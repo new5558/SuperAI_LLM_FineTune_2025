@@ -73,10 +73,14 @@ if __name__ == "__main__":
         # Adjust this based on your model's output format
         if len(output) == 0:
             return '0'
-        if '1' in output:
-            return '1'
         if '0' in output:
             return '0'
+        if '1' in output:
+            return '1'
+        if '2' in output:
+            return '2'
+        if '3' in output:
+            return '3'
         return '1'
 
     # To save memory during processing
@@ -116,6 +120,7 @@ if __name__ == "__main__":
                     
                 # content = tokenizer.decode(output_ids[index:], skip_special_tokens=True).strip("\n")
                 content = tokenizer.decode(output_ids, skip_special_tokens=True).strip("\n")
+                print(content, 'content')
                 all_predictions.append(clean_output(content))
         
         return all_predictions

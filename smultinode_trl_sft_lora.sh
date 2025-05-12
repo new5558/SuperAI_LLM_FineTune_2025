@@ -40,7 +40,7 @@ accelerate launch \
     --machine_rank $SLURM_PROCID \
     --main_process_ip $MASTER_ADDR \
     --main_process_port $MASTER_PORT \
-    scripts/train_trl_sft.py \
+    scripts/train_trl_sft_lora.py \
         --model_name_or_path /project/ai901002-ai25tn/interesting_model/Qwen3-8B \
         --train_data_path <train_path> \
         --eval_data_path <val_path> \
@@ -49,8 +49,8 @@ accelerate launch \
         --bf16 True \
         --output_dir <model_save_path> \
         --num_train_epochs 20 \
-        --per_device_train_batch_size 2 \
-        --per_device_eval_batch_size 2 \
+        --per_device_train_batch_size 8 \
+        --per_device_eval_batch_size 8 \
         --save_strategy "steps" \
         --save_steps 20 \
         --eval_steps 20 \
