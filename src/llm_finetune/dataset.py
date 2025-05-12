@@ -1,77 +1,41 @@
-import transformers
-import torch
-from torch.utils.data import Dataset
-
-from typing import Dict
-import logging
-
-from .data_collator import DataCollatorForSupervisedDataset
-from .constant import PROMPT_DICT
-from .tokenize import preprocess
-from . import utils
+from datasets import load_from_disk
+from .grpo import process_agnews_dataset_for_reasoning
 
 
-class SupervisedDataset(Dataset):
-    """Dataset for supervised fine-tuning."""
 
-    def __init__(
-        self,
-        data_path: str,
-        tokenizer: transformers.PreTrainedTokenizer,
-    ):
-        super(SupervisedDataset, self).__init__()
-        logging.warning("Loading data...")
-        list_data_dict = utils.jload(data_path)
+def get_agnews_questions_for_sft(dataset):
+  dataset = dataset.map(lambda x: { # type: ignore
+      'prompt': [
+          {'role': 'user', 'content': x['input_train']}
+      ],
+      'completion': [
+          {'role': 'assistant', 'content': x['answer']}
+      ],
+  }) # type: ignore
+  return dataset # type: ignore
 
-        logging.warning("Formatting inputs...")
-        prompt_input, prompt_no_input = (
-            PROMPT_DICT["prompt_input"],
-            PROMPT_DICT["prompt_no_input"],
-        )
-        sources = [
-            (
-                prompt_input.format_map(example)
-                if example.get("input", "") != ""
-                else prompt_no_input.format_map(example)
-            )
-            for example in list_data_dict
-        ]
-        targets = [
-            f"{example['output']}{tokenizer.eos_token}"
-            for example in list_data_dict  # noqa: E501
-        ]
+def make_supervised_data_module_trl(data_args):
+    """(New Method) Make dataset for TRL supervised fine-tuning."""
 
-        logging.warning("Tokenizing inputs... This may take some time...")
-        data_dict = preprocess(sources, targets, tokenizer)
-
-        self.input_ids = data_dict["input_ids"]
-        self.labels = data_dict["labels"]
-
-    def __len__(self):
-        return len(self.input_ids)
-
-    def __getitem__(self, i) -> Dict[str, torch.Tensor]:
-        return dict(
-            input_ids=self.input_ids[i],
-            labels=self.labels[i],
-        )
-
-
-def make_supervised_data_module(
-    tokenizer: transformers.PreTrainedTokenizer, data_args
-) -> Dict:
-    """Make dataset and collator for supervised fine-tuning."""
-    train_dataset = SupervisedDataset(
-        tokenizer=tokenizer, data_path=data_args.train_data_path
-    )
+    train_dataset = get_agnews_questions_for_sft(load_from_disk(data_args.train_data_path))
     eval_dataset = None
     if data_args.eval_data_path:
-        eval_dataset = SupervisedDataset(
-            tokenizer=tokenizer, data_path=data_args.eval_data_path
-        )
-    data_collator = DataCollatorForSupervisedDataset(tokenizer=tokenizer)
+        eval_dataset = get_agnews_questions_for_sft(load_from_disk(data_args.eval_data_path))
+    
     return dict(
         train_dataset=train_dataset,
         eval_dataset=eval_dataset,
-        data_collator=data_collator,
+    )
+
+def make_reasoning_data_module_trl(data_args):
+    """(New Method) Make dataset for TRL supervised fine-tuning."""
+
+    train_dataset = process_agnews_dataset_for_reasoning(load_from_disk(data_args.train_data_path))
+    eval_dataset = None
+    if data_args.eval_data_path:
+        eval_dataset = process_agnews_dataset_for_reasoning(load_from_disk(data_args.eval_data_path))
+    
+    return dict(
+        train_dataset=train_dataset,
+        eval_dataset=eval_dataset,
     )

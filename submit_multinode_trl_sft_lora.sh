@@ -1,9 +1,9 @@
 #!/bin/bash
 #SBATCH -p gpu                          # Specify partition [Compute/Memory/GPU]
-#SBATCH -N 2 -c 64                      # Specify number of nodes and processors per task
+#SBATCH -N 4 -c 64                      # Specify number of nodes and processors per task
 #SBATCH --ntasks-per-node=1		        # Specify number of tasks per node
 #SBATCH --gpus-per-node=4		        # Specify total number of GPUs
-#SBATCH -t 120:00:00                    # Specify maximum time limit (hour: minute: second)
+#SBATCH -t 20:00:00                    # Specify maximum time limit (hour: minute: second)
 #SBATCH -A <project_name>               # Specify project name
 #SBATCH -J llm_finetuning               # Specify job name
 
@@ -24,4 +24,4 @@ export COUNT_NODE=`scontrol show hostnames "$SLURM_JOB_NODELIST" | wc -l`
 echo go $COUNT_NODE
 echo $HOSTNAMES
 
-srun sh smultinode.sh
+srun sh smultinode_trl_sft_lora.sh

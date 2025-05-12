@@ -15,8 +15,11 @@ dependencies = [
     "hydra-core",
     "protobuf",
     "torch",
+
     "deepspeed",
     "accelerate",
     "peft",
     "wandb",
+    "trl[vllm]",
+    "pandas",
 ]
